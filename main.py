@@ -26,10 +26,25 @@ df = load_data()
 # Sidebar filters
 st.sidebar.title("📋 Filters")
 
-weather_options = st.sidebar.multiselect("Weather", options=df['Weather'].unique(), default=df['Weather'].unique())
-traffic_options = st.sidebar.multiselect("Traffic Level", options=df['Traffic_Level'].unique(), default=df['Traffic_Level'].unique())
-time_options = st.sidebar.multiselect("Time of Day", options=df['Time_of_Day'].unique(), default=df['Time_of_Day'].unique())
-vehicle_options = st.sidebar.multiselect("Vehicle Type", options=df['Vehicle_Type'].unique(), default=df['Vehicle_Type'].unique())
+# Weather filter
+with st.sidebar.expander("Weather"):
+    weather_unique = df['Weather'].dropna().unique()
+    weather_options = [w for w in weather_unique if st.checkbox(w, value=True, key=f"weather_{w}")]
+
+# Traffic Level filter
+with st.sidebar.expander("Traffic Level"):
+    traffic_unique = df['Traffic_Level'].dropna().unique()
+    traffic_options = [t for t in traffic_unique if st.checkbox(t, value=True, key=f"traffic_{t}")]
+
+# Time of Day filter
+with st.sidebar.expander("Time of Day"):
+    time_unique = df['Time_of_Day'].dropna().unique()
+    time_options = [t for t in time_unique if st.checkbox(t, value=True, key=f"time_{t}")]
+
+# Vehicle Type filter
+with st.sidebar.expander("Vehicle Type"):
+    vehicle_unique = df['Vehicle_Type'].dropna().unique()
+    vehicle_options = [v for v in vehicle_unique if st.checkbox(v, value=True, key=f"vehicle_{v}")]
 
 # Distance slider
 min_distance = float(df['Distance_km'].min())
@@ -95,7 +110,6 @@ scatter_col, treemap_col = st.columns(2)
 with scatter_col:
     fig4, ax4 = plt.subplots(figsize=(8, 6))
 
-    # Create scatterplot
     sns.scatterplot(
         data=filtered_df,
         x="Distance_km",
@@ -114,14 +128,12 @@ with scatter_col:
     new_labels = []
 
     for h, l in zip(handles, labels):
-        # keep only non-numeric labels (i.e., Vehicle Types)
         if not l.replace('.', '', 1).isdigit():
             new_handles.append(h)
             new_labels.append(l)
 
     ax4.legend(new_handles, new_labels, title="Vehicle Type", bbox_to_anchor=(1.05, 1), loc='upper left')
 
-    # Set axis labels and title
     ax4.set_title("Distance vs Delivery Time per Delivery\n(Size = Courier Exp, Color = Vehicle Type)")
     ax4.set_xlabel("Distance (KM)")
     ax4.set_ylabel("Delivery Time (Min)")
